@@ -1,1 +1,1 @@
-Comunicação entre processos utilizando memória compartilha da e sockets.
+Comunicação entre processos utilizando memória compartilhada e sockets.
