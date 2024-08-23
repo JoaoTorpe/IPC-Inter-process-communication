@@ -7,6 +7,7 @@
 #include <sys/un.h>
 
 #define SOCK_PATH "unix_socket"
+#define BUFFER_SIZE 256
 
 void error(char *msg)
 {
@@ -19,30 +20,37 @@ int main(int argc, char *argv[])
     int sockfd, portno, n;
 
     struct sockaddr_un serv_addr;
-    char buffer[256];
+    FILE *file;
+    char buffer[BUFFER_SIZE];
 
-    
     sockfd = socket(AF_UNIX, SOCK_DGRAM, 0);
-    if (sockfd < 0) 
+    if (sockfd < 0)
         error("Erro ao abrir socket");
 
 
     bzero((char *) &serv_addr, sizeof(serv_addr));
     serv_addr.sun_family = AF_UNIX;
-    strcpy(serv_addr.sun_path, SOCK_PATH); 
+    strcpy(serv_addr.sun_path, SOCK_PATH);
 
 
-    printf("Insira o nome do arquivo: ");
-    bzero(buffer,256);
-    fgets(buffer,255,stdin);
+    file = fopen(argv[1], "r");
+    if (file == NULL) {
+        error("Erro ao abrir o arquivo");
+    }
+   printf("Enviando linhas do arquivo para o servidor...\n");
+     while (fgets(buffer, BUFFER_SIZE, file)) {
 
-  
-    printf("Sending data...\n");
-    n = sendto(sockfd, buffer, strlen(buffer), 0, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
+     n = sendto(sockfd, buffer, strlen(buffer), 0, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
 
-    if (n < 0) 
-         error("ERROR writing to socket");
+    }
 
+
+
+
+
+
+
+    fclose(file);
     close(sockfd);
     return 0;
 }
